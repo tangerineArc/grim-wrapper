@@ -16,11 +16,11 @@ export default function ChatInput({
       <div className="max-w-3xl flex-1 pt-2 px-2 border-2 border-b-0 rounded-3xl rounded-b-none">
         <Textarea
           placeholder="Type your message here..."
-          className="resize-none h-28 rounded-2xl rounded-b-none border-b-0 focus-visible:ring-0 p-4 pt-5"
+          className="resize-none h-24 rounded-2xl rounded-b-none border-b-0 focus-visible:ring-0 p-4 pt-5"
           value={prompt}
           onChange={promptChangeHandler}
         />
-        <div className="py-2 px-4 bg-primary-foreground border-x-input border-x-1 flex items-center justify-between">
+        <div className="py-2 px-4 bg-transparent border-x-input border-x-1 flex items-center justify-between dark:bg-input/30">
           <div className="flex items-center gap-4">
             <ModelSelector />
             <Toggle>
