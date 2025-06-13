@@ -1,7 +1,6 @@
 "use client";
 
-import type { Chat } from "@/types/chat";
-
+import { Chat } from "@prisma/client";
 import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 
@@ -9,13 +8,12 @@ import ChatInput from "./ChatInput";
 import Greeting from "./Greeting";
 import CustomMarkdown from "./Markdown";
 
-export default function Arena() {
+export default function Arena({ initialChats }: { initialChats: Chat[] }) {
   const { data: session } = useSession();
 
-  const [chats, setChats] = useState<Chat[]>([]);
+  const [chats, setChats] = useState(initialChats);
   const [prompt, setPrompt] = useState("");
 
-  const frameRef = useRef<number | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -23,13 +21,36 @@ export default function Arena() {
   }, [chats]);
 
   const handleNewChat = async () => {
+    if (!prompt.trim()) {
+      return;
+    }
+
+    if (!session) {
+      console.log("Unauthorized");
+      return;
+    }
+
     const response = await fetch("/api/ai/gemini", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt, model: "gemini-2.0-flash" }),
     });
 
-    const chat: Chat = { id: new Date().toString(), prompt, result: "" };
+    const chatId = response.headers.get("X-Chat-ID");
+    console.log(chatId);
+    if (!chatId) {
+      console.log("Cannot find chat ID");
+      return;
+    }
+
+    const chat: Chat = {
+      id: chatId,
+      prompt,
+      result: "",
+      userId: session?.user.id,
+      threadId: null,
+      createdAt: new Date(),
+    };
 
     setPrompt("");
     setChats((prev) => [...prev, chat]);
@@ -41,7 +62,6 @@ export default function Arena() {
         if (!last) return prev;
 
         const updatedLast = { ...last, result: "Something went wrong" };
-
         return [...prev.slice(0, -1), updatedLast];
       });
       return;
@@ -56,20 +76,13 @@ export default function Arena() {
 
       result += decoder.decode(value, { stream: true });
 
-      if (frameRef.current === null) {
-        frameRef.current = requestAnimationFrame(() => {
-          setChats((prev) => {
-            const last = prev.at(-1);
-            if (!last) return prev;
+      setChats((prev) => {
+        const last = prev.at(-1);
+        if (!last) return prev;
 
-            const updatedLast = { ...last, result };
-
-            frameRef.current = null;
-
-            return [...prev.slice(0, -1), updatedLast];
-          });
-        });
-      }
+        const updatedLast = { ...last, result };
+        return [...prev.slice(0, -1), updatedLast];
+      });
     }
   };
 

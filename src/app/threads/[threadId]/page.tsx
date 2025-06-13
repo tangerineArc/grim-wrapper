@@ -19,12 +19,26 @@ import {
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-export default async function Page() {
+export default async function ThreadPage({
+  params,
+}: {
+  params: { threadId: string };
+}) {
   const session = await getSession();
-  const chats = await prisma.chat.findMany({
-    where: { userId: session?.user.id },
-    orderBy: { createdAt: "asc" },
+
+  const thread = await prisma.thread.findUnique({
+    where: { id: params.threadId },
+    include: { chats: { orderBy: { createdAt: "asc" } } },
   });
+
+  if (!thread || thread.userId !== session?.user.id) {
+    return <p>Thread not found or access denied</p>;
+  }
+
+  // const chats = await prisma.chat.findMany({
+  //   where: { userId: session?.user.id },
+  //   orderBy: { createdAt: "asc" },
+  // });
 
   return (
     <SidebarProvider>
@@ -50,7 +64,7 @@ export default async function Page() {
             </BreadcrumbList>
           </Breadcrumb>
         </header>
-        <Arena initialChats={chats} />
+        <Arena initialChats={thread.chats} threadId={params.threadId} />
       </SidebarInset>
     </SidebarProvider>
   );

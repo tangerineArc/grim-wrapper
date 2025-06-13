@@ -45,6 +45,7 @@ model User {
   accounts Account[]
   sessions Session[]
   threads  Thread[]
+  chats    Chat[]
 }
 
 model VerificationToken {
@@ -66,10 +67,13 @@ model Thread {
 }
 
 model Chat {
-  id       String @id @default(cuid())
-  prompt   String
-  result   String
-  threadId String
+  id        String   @id @default(cuid())
+  createdAt DateTime @updatedAt()
+  prompt    String
+  result    String   @default("")
+  userId    String
+  threadId  String?
 
-  thread Thread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  thread Thread? @relation(fields: [threadId], references: [id], onDelete: Cascade)
 }

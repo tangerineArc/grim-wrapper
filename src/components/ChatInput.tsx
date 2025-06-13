@@ -19,6 +19,7 @@ export default function ChatInput({
           className="resize-none h-24 rounded-2xl rounded-b-none border-b-0 focus-visible:ring-0 p-4 pt-5"
           value={prompt}
           onChange={promptChangeHandler}
+          autoFocus
         />
         <div className="py-2 px-4 bg-transparent border-x-input border-x-1 flex items-center justify-between dark:bg-input/30">
           <div className="flex items-center gap-4">
