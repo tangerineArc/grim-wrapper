@@ -7,6 +7,14 @@ export async function POST() {
   const session = await getSession();
   if (!session) return new NextResponse("Unauthorized", { status: 401 });
 
+  const existingEmptyThread = await prisma.thread.findFirst({
+    where: { userId: session.user.id, chats: { none: {} } },
+  });
+
+  if (existingEmptyThread) {
+    return NextResponse.json({ id: existingEmptyThread.id });
+  }
+
   const thread = await prisma.thread.create({
     data: { userId: session.user.id, title: "New chat" },
   });

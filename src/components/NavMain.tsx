@@ -28,8 +28,6 @@ export default function NavMain({
     id: string;
     title: string;
     createdAt: Date;
-    // url: string;
-    // isActive?: boolean;
   }[];
 }) {
   const params = useParams();

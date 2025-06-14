@@ -29,17 +29,24 @@ export default function HomePage() {
   const [threadId, setThreadId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (status === "unauthenticated" || status === "loading") {
+    if (status !== "authenticated") {
       return;
     }
 
     const existingThreadId = localStorage.getItem("threadId");
 
     if (existingThreadId) {
-      setThreadId(existingThreadId);
-      router.replace(`/threads/${existingThreadId}`);
+      if (!window.location.pathname.includes(existingThreadId)) {
+        router.replace(`/threads/${existingThreadId}`);
+      }
     } else {
+      // avoid firing twice on re-renders
+      let didCreate = false;
+
       const createThread = async () => {
+        if (didCreate) return;
+        didCreate = true;
+
         const res = await fetch("/api/threads", { method: "POST" });
         const data = await res.json();
 
