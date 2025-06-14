@@ -57,9 +57,10 @@ model VerificationToken {
 }
 
 model Thread {
-  id     String @id @default(cuid())
-  title  String
-  userId String
+  id        String   @id @default(cuid())
+  createdAt DateTime @updatedAt()
+  title     String
+  userId    String
 
   chats Chat[]
 
@@ -72,7 +73,7 @@ model Chat {
   prompt    String
   result    String   @default("")
   userId    String
-  threadId  String?
+  threadId  String
 
   user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   thread Thread? @relation(fields: [threadId], references: [id], onDelete: Cascade)

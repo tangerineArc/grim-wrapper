@@ -1,63 +1,79 @@
 "use client";
 
-import { MoreHorizontal, type LucideIcon } from "lucide-react";
+import { MoreHorizontal, Pin, TextCursorInput, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "./ui/dropdown-menu";
 import {
   SidebarGroup,
+  SidebarGroupLabel,
   SidebarMenu,
+  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar";
+} from "./ui/sidebar";
 
-export function NavMain({
-  items,
+export default function NavMain({
+  threads,
 }: {
-  items: {
+  threads: {
+    id: string;
     title: string;
-    url: string;
-    icon?: LucideIcon;
-    isActive?: boolean;
-    items?: {
-      title: string;
-      url: string;
-    }[];
+    createdAt: Date;
+    // url: string;
+    // isActive?: boolean;
   }[];
 }) {
+  const params = useParams();
   const { isMobile } = useSidebar();
 
   return (
     <SidebarGroup>
+      <SidebarGroupLabel>Threads</SidebarGroupLabel>
       <SidebarMenu>
-        {items.map((item) => (
-          <DropdownMenu key={item.title}>
-            <SidebarMenuItem>
+        {threads.map((thread) => (
+          <SidebarMenuItem key={thread.id}>
+            <SidebarMenuButton isActive={thread.id === params.threadId}>
+              <Link
+                href={`/threads/${thread.id}`}
+                className="truncate block max-w-full text-left"
+              >{`${thread.id}`}</Link>
+            </SidebarMenuButton>
+            <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuButton className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
-                  {item.title} <MoreHorizontal className="ml-auto" />
-                </SidebarMenuButton>
+                <SidebarMenuAction showOnHover>
+                  <MoreHorizontal />
+                  <span className="sr-only">More</span>
+                </SidebarMenuAction>
               </DropdownMenuTrigger>
-              {item.items?.length ? (
-                <DropdownMenuContent
-                  side={isMobile ? "bottom" : "right"}
-                  align={isMobile ? "end" : "start"}
-                  className="min-w-56 rounded-lg"
-                >
-                  {item.items.map((item) => (
-                    <DropdownMenuItem asChild key={item.title}>
-                      <a href={item.url}>{item.title}</a>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              ) : null}
-            </SidebarMenuItem>
-          </DropdownMenu>
+              <DropdownMenuContent
+                side={isMobile ? "bottom" : "right"}
+                align={isMobile ? "end" : "start"}
+                className="min-w-32 rounded-lg ml-2"
+              >
+                <DropdownMenuItem>
+                  <Pin className="text-muted-foreground" /> <span>Pin</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <TextCursorInput className="text-muted-foreground" />
+                  <span>Rename</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem variant="destructive">
+                  <Trash2 />
+                  <span>Delete</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </SidebarMenuItem>
         ))}
       </SidebarMenu>
     </SidebarGroup>

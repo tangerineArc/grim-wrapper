@@ -26,19 +26,15 @@ export default async function ThreadPage({
 }) {
   const session = await getSession();
 
+  const { threadId } = await params;
   const thread = await prisma.thread.findUnique({
-    where: { id: params.threadId },
+    where: { id: threadId },
     include: { chats: { orderBy: { createdAt: "asc" } } },
   });
 
   if (!thread || thread.userId !== session?.user.id) {
     return <p>Thread not found or access denied</p>;
   }
-
-  // const chats = await prisma.chat.findMany({
-  //   where: { userId: session?.user.id },
-  //   orderBy: { createdAt: "asc" },
-  // });
 
   return (
     <SidebarProvider>
@@ -64,7 +60,7 @@ export default async function ThreadPage({
             </BreadcrumbList>
           </Breadcrumb>
         </header>
-        <Arena initialChats={thread.chats} threadId={params.threadId} />
+        {thread && <Arena threadId={threadId} initialChats={thread.chats} />}
       </SidebarInset>
     </SidebarProvider>
   );

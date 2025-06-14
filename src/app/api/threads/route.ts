@@ -13,3 +13,15 @@ export async function POST() {
 
   return NextResponse.json({ id: thread.id });
 }
+
+export async function GET() {
+  const session = await getSession();
+  if (!session) return new NextResponse("Unauthorized", { status: 401 });
+
+  const threads = await prisma.thread.findMany({
+    where: { userId: session.user.id },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return NextResponse.json(threads);
+}

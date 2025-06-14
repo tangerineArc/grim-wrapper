@@ -1,9 +1,13 @@
-import { LogIn, Target } from "lucide-react";
+"use client";
+
+import { DatabaseZap, Flame, LogIn, Target, Search } from "lucide-react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
 
+import NavActions from "./NavActions";
+import NavMain from "./NavMain";
 import NavUser from "./NavUser";
-
-import { NavMain } from "@/components/NavMain";
 
 import {
   Sidebar,
@@ -16,8 +20,6 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 
-import { getSession } from "@/lib/auth";
-
 const data = {
   navMain: [
     {
@@ -25,11 +27,15 @@ const data = {
       url: "#",
       items: [
         {
-          title: "Installation",
+          title: "Rename",
           url: "#",
         },
         {
-          title: "Project Structure",
+          title: "Pin",
+          url: "#",
+        },
+        {
+          title: "Delete",
           url: "#",
         },
       ],
@@ -55,12 +61,43 @@ const data = {
       ],
     },
   ],
+  actions: [
+    {
+      title: "New thread",
+      url: "/",
+      icon: Flame,
+    },
+    {
+      title: "Search your threads",
+      url: "/search",
+      icon: Search,
+    },
+    {
+      title: "Knowledge Base",
+      url: "/knowledge-base",
+      icon: DatabaseZap,
+    },
+  ],
 };
 
-export default async function AppSidebar({
+export default function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
-  const session = await getSession();
+  const { data: session } = useSession();
+
+  const [threads, setThreads] = useState<Thread[]>([]);
+
+  useEffect(() => {
+    const fetchThreads = async () => {
+      const res = await fetch("/api/threads");
+      if (!res.ok) return;
+
+      const data: Thread[] = await res.json();
+      setThreads(data);
+    };
+
+    fetchThreads();
+  }, []);
 
   return (
     <Sidebar {...props}>
@@ -80,14 +117,15 @@ export default async function AppSidebar({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavActions items={data.actions} />
+        <NavMain threads={threads} />
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               {session ? (
-                <NavUser user={session.user} />
+                <NavUser user={session?.user} />
               ) : (
                 <Link href="/auth/signin">
                   <LogIn className="size-4" />
@@ -102,3 +140,9 @@ export default async function AppSidebar({
     </Sidebar>
   );
 }
+
+type Thread = {
+  id: string;
+  title: string;
+  createdAt: Date;
+};

@@ -1,6 +1,6 @@
 "use client";
 
-import { Chat } from "@prisma/client";
+import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 
@@ -8,20 +8,43 @@ import ChatInput from "./ChatInput";
 import Greeting from "./Greeting";
 import CustomMarkdown from "./Markdown";
 
-export default function Arena({ initialChats }: { initialChats: Chat[] }) {
+export default function Arena({
+  threadId,
+  initialChats,
+}: {
+  threadId: string | null;
+  initialChats: Chat[];
+}) {
+  const pathname = usePathname();
+  const router = useRouter();
+
   const { data: session } = useSession();
 
-  const [chats, setChats] = useState(initialChats);
+  const [chats, setChats] = useState<Chat[]>(initialChats);
   const [prompt, setPrompt] = useState("");
 
   const bottomRef = useRef<HTMLDivElement>(null);
 
+  // scroll new chat into view
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chats]);
 
+  // update prompt as per textarea value
+  const handlePromptChange = (
+    event: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    setPrompt(event.target.value);
+  };
+
+  // create new chat
   const handleNewChat = async () => {
     if (!prompt.trim()) {
+      return;
+    }
+
+    if (!threadId) {
+      console.log("No thread");
       return;
     }
 
@@ -33,27 +56,24 @@ export default function Arena({ initialChats }: { initialChats: Chat[] }) {
     const response = await fetch("/api/ai/gemini", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt, model: "gemini-2.0-flash" }),
+      body: JSON.stringify({ prompt, model: "gemini-2.0-flash", threadId }),
     });
 
     const chatId = response.headers.get("X-Chat-ID");
-    console.log(chatId);
     if (!chatId) {
       console.log("Cannot find chat ID");
       return;
     }
 
-    const chat: Chat = {
+    const newChat: Chat = {
       id: chatId,
       prompt,
       result: "",
-      userId: session?.user.id,
-      threadId: null,
-      createdAt: new Date(),
+      threadId,
     };
 
     setPrompt("");
-    setChats((prev) => [...prev, chat]);
+    setChats((prev) => [...prev, newChat]);
 
     const reader = response?.body?.getReader();
     if (!reader) {
@@ -84,12 +104,12 @@ export default function Arena({ initialChats }: { initialChats: Chat[] }) {
         return [...prev.slice(0, -1), updatedLast];
       });
     }
-  };
 
-  const handlePromptChange = (
-    event: React.ChangeEvent<HTMLTextAreaElement>
-  ) => {
-    setPrompt(event.target.value);
+    localStorage.removeItem("threadId");
+    // Redirect to thread page if still on root
+    if (pathname === "/") {
+      router.push(`/threads/${threadId}`);
+    }
   };
 
   return (
@@ -110,7 +130,7 @@ export default function Arena({ initialChats }: { initialChats: Chat[] }) {
                 }
               >
                 <div className="flex justify-end">
-                  <p className="bg-neutral-800 w-fit py-4 px-6 rounded-l-xl rounded-t-xl">
+                  <p className="bg-secondary w-fit py-4 px-6 rounded-l-xl rounded-t-xl">
                     {chat.prompt}
                   </p>
                 </div>
@@ -132,3 +152,10 @@ export default function Arena({ initialChats }: { initialChats: Chat[] }) {
     </>
   );
 }
+
+type Chat = {
+  id: string;
+  prompt: string;
+  result: string;
+  threadId: string | null;
+};

@@ -1,3 +1,9 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
+
 import AppSidebar from "@/components/AppSidebar";
 import Arena from "@/components/Arena";
 
@@ -16,15 +22,34 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 
-import { getSession } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+export default function HomePage() {
+  const { status } = useSession();
+  const router = useRouter();
 
-export default async function Page() {
-  const session = await getSession();
-  const chats = await prisma.chat.findMany({
-    where: { userId: session?.user.id },
-    orderBy: { createdAt: "asc" },
-  });
+  const [threadId, setThreadId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (status === "unauthenticated" || status === "loading") {
+      return;
+    }
+
+    const existingThreadId = localStorage.getItem("threadId");
+
+    if (existingThreadId) {
+      setThreadId(existingThreadId);
+      router.replace(`/threads/${existingThreadId}`);
+    } else {
+      const createThread = async () => {
+        const res = await fetch("/api/threads", { method: "POST" });
+        const data = await res.json();
+
+        localStorage.setItem("threadId", data.id);
+        setThreadId(data.id);
+      };
+
+      createThread();
+    }
+  }, [status, router]);
 
   return (
     <SidebarProvider>
@@ -50,7 +75,7 @@ export default async function Page() {
             </BreadcrumbList>
           </Breadcrumb>
         </header>
-        <Arena initialChats={chats} />
+        <Arena threadId={threadId} initialChats={[]} />
       </SidebarInset>
     </SidebarProvider>
   );

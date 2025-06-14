@@ -12,10 +12,10 @@ export default function Greeting({ user }: { user: User | undefined }) {
       </h1>
       <Tabs defaultValue={greetingData[0].category}>
         <TabsList>
-          {greetingData.map(({ icon, category }) => (
-            <TabsTrigger key={category} value={category}>
-              {icon}
-              {category}
+          {greetingData.map((data) => (
+            <TabsTrigger key={data.category} value={data.category}>
+              <data.icon />
+              {data.category}
             </TabsTrigger>
           ))}
         </TabsList>

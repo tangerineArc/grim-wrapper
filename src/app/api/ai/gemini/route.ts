@@ -9,10 +9,10 @@ export async function POST(req: NextRequest) {
   if (!session) return new Response("Unauthorized", { status: 401 });
 
   const body = await req.json();
-  const { prompt, model } = body;
+  const { prompt, model, threadId } = body;
 
   const chat = await prisma.chat.create({
-    data: { prompt, userId: session.user.id },
+    data: { prompt, userId: session.user.id, threadId },
   });
 
   const response = await gemini(model, prompt);
