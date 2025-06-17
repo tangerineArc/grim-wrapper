@@ -22,7 +22,7 @@ import { prisma } from "@/lib/prisma";
 export default async function ThreadPage({
   params,
 }: {
-  params: { threadId: string };
+  params: Promise<{ threadId: string }>;
 }) {
   const session = await getSession();
 
@@ -60,7 +60,7 @@ export default async function ThreadPage({
             </BreadcrumbList>
           </Breadcrumb>
         </header>
-        {thread && <Arena threadId={threadId} initialChats={thread.chats} />}
+        <Arena threadId={threadId} initialChats={thread.chats} />
       </SidebarInset>
     </SidebarProvider>
   );

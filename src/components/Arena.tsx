@@ -26,12 +26,13 @@ export default function Arena({
   const [currentChat, setCurrentChat] = useState<Chat | null>(null);
   const [prompt, setPrompt] = useState("");
 
+  const [scrollTrick, setScrollTrick] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // scroll new chat into view
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chats]);
+  }, [scrollTrick]);
 
   // update prompt as per textarea value
   const handlePromptChange = useCallback(
@@ -60,6 +61,7 @@ export default function Arena({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         prompt,
+        // model: "mistralai/mistral-small-3.1-24b-instruct:free",
         model: "google/gemini-2.0-flash-exp:free",
         threadId,
       }),
@@ -79,9 +81,11 @@ export default function Arena({
     };
 
     setPrompt("");
+    setScrollTrick(!scrollTrick);
     setCurrentChat(newChat);
 
     const reader = response?.body?.getReader();
+    console.log("reader ready, streaming...");
     if (!reader) {
       setChats((prev) => [
         ...prev,
@@ -90,14 +94,14 @@ export default function Arena({
       return;
     }
 
-    const decoder = new TextDecoder();
     let result = "";
+    const decoder = new TextDecoder();
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
 
       result += decoder.decode(value, { stream: true });
-      setCurrentChat({ ...newChat, result });
+      setCurrentChat((prev) => (prev ? { ...prev, result } : null));
     }
     result += decoder.decode(); // flush the buffer
     setChats((prev) => [...prev, { ...newChat, result }]);
@@ -112,8 +116,8 @@ export default function Arena({
 
   return (
     <>
-      <main className="py-8 px-4 flex justify-center h-full">
-        {!chats.length ? (
+      <main className="pt-8 pb-32 px-4 flex justify-center h-full">
+        {!currentChat && !chats.length ? (
           <div className="px-8 flex items-center w-3xl">
             <Greeting user={session?.user} />
           </div>
@@ -122,10 +126,11 @@ export default function Arena({
             {chats.map((chat) => (
               <ChatBubble chat={chat} key={chat.id} />
             ))}
-            {currentChat && <ChatBubble chat={currentChat} ref={bottomRef} />}
+            {currentChat && <ChatBubble chat={currentChat} />}
           </div>
         )}
       </main>
+      <div ref={bottomRef} />
       <div className="sticky bottom-0 bg-background rounded-b-lg">
         <ChatInput
           prompt={prompt}
