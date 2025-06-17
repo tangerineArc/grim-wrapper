@@ -4,7 +4,15 @@ import { memo } from "react";
 
 import CustomMarkdown from "./Markdown";
 
-const ChatBubble = ({ chat }: { chat: Chat }) => {
+import { Skeleton } from "@/components/ui/skeleton";
+
+const ChatBubble = ({
+  chat,
+  isLoading = false,
+}: {
+  chat: Chat;
+  isLoading?: boolean;
+}) => {
   return (
     <div className="space-y-8">
       <div className="flex justify-end">
@@ -13,6 +21,13 @@ const ChatBubble = ({ chat }: { chat: Chat }) => {
         </p>
       </div>
       <div>
+        {isLoading && (
+          <div className="flex gap-x-2">
+            <Skeleton className="h-4 w-4" />
+            <Skeleton className="h-4 w-8" />
+            <Skeleton className="h-4 w-12" />
+          </div>
+        )}
         <CustomMarkdown content={chat.result} />
       </div>
     </div>

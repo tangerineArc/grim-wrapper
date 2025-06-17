@@ -25,6 +25,7 @@ export default function Arena({
   const [chats, setChats] = useState<Chat[]>(initialChats);
   const [currentChat, setCurrentChat] = useState<Chat | null>(null);
   const [prompt, setPrompt] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const [scrollTrick, setScrollTrick] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -56,13 +57,25 @@ export default function Arena({
       return;
     }
 
+    const newChat: Chat = {
+      id: new Date().toString(),
+      prompt,
+      result: "",
+      threadId,
+    };
+
+    setPrompt("");
+    setCurrentChat(newChat);
+    setScrollTrick(!scrollTrick);
+
+    setIsLoading(true);
     const response = await fetch("/api/ai/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         prompt,
-        // model: "mistralai/mistral-small-3.1-24b-instruct:free",
-        model: "google/gemini-2.0-flash-exp:free",
+        model: "mistralai/mistral-small-3.1-24b-instruct:free",
+        // model: "google/gemini-2.0-flash-exp:free",
         threadId,
       }),
     });
@@ -73,38 +86,34 @@ export default function Arena({
       return;
     }
 
-    const newChat: Chat = {
-      id: chatId,
-      prompt,
-      result: "",
-      threadId,
-    };
-
-    setPrompt("");
-    setScrollTrick(!scrollTrick);
-    setCurrentChat(newChat);
-
     const reader = response?.body?.getReader();
-    console.log("reader ready, streaming...");
     if (!reader) {
       setChats((prev) => [
         ...prev,
-        { ...newChat, result: "Something went wrong" },
+        { ...newChat, id: chatId, result: "Something went wrong" },
       ]);
+      console.log("couldn't create reader");
+      setIsLoading(false);
       return;
     }
 
     let result = "";
+    let firstChunk = true;
     const decoder = new TextDecoder();
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
 
+      if (firstChunk) {
+        setIsLoading(false);
+        firstChunk = false;
+      }
+
       result += decoder.decode(value, { stream: true });
       setCurrentChat((prev) => (prev ? { ...prev, result } : null));
     }
     result += decoder.decode(); // flush the buffer
-    setChats((prev) => [...prev, { ...newChat, result }]);
+    setChats((prev) => [...prev, { ...newChat, id: chatId, result }]);
     setCurrentChat(null);
 
     localStorage.removeItem("threadId");
@@ -126,7 +135,9 @@ export default function Arena({
             {chats.map((chat) => (
               <ChatBubble chat={chat} key={chat.id} />
             ))}
-            {currentChat && <ChatBubble chat={currentChat} />}
+            {currentChat && (
+              <ChatBubble chat={currentChat} isLoading={isLoading} />
+            )}
           </div>
         )}
       </main>
