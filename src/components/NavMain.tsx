@@ -39,7 +39,7 @@ export default function NavMain({
       <SidebarMenu>
         {threads.map((thread) => (
           <SidebarMenuItem key={thread.id}>
-            <SidebarMenuButton isActive={thread.id === params.threadId}>
+            <SidebarMenuButton isActive={thread.id === params.threadId} size="sm">
               <Link
                 href={`/threads/${thread.id}`}
                 className="truncate block max-w-full text-left"

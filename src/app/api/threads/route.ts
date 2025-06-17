@@ -27,7 +27,7 @@ export async function GET() {
   if (!session) return new NextResponse("Unauthorized", { status: 401 });
 
   const threads = await prisma.thread.findMany({
-    where: { userId: session.user.id },
+    where: { userId: session.user.id, chats: { some: {} } },
     orderBy: { createdAt: "desc" },
   });
 

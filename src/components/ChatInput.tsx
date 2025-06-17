@@ -1,4 +1,5 @@
 import { ArrowUp, Globe, Paperclip } from "lucide-react";
+import { memo } from "react";
 
 import ModelSelector from "./ModelSelector";
 
@@ -6,7 +7,7 @@ import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 import { Toggle } from "./ui/toggle";
 
-export default function ChatInput({
+function ChatInput({
   prompt,
   promptChangeHandler,
   newChatHandler,
@@ -39,6 +40,8 @@ export default function ChatInput({
     </div>
   );
 }
+
+export default memo(ChatInput);
 
 type ChatInputProps = {
   prompt: string;

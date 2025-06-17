@@ -1,12 +1,14 @@
 "use client";
 
+import type { Chat } from "@/types/chat";
+
 import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
+import ChatBubble from "./ChatBubble";
 import ChatInput from "./ChatInput";
 import Greeting from "./Greeting";
-import CustomMarkdown from "./Markdown";
 
 export default function Arena({
   threadId,
@@ -21,6 +23,7 @@ export default function Arena({
   const { data: session } = useSession();
 
   const [chats, setChats] = useState<Chat[]>(initialChats);
+  const [currentChat, setCurrentChat] = useState<Chat | null>(null);
   const [prompt, setPrompt] = useState("");
 
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -31,32 +34,35 @@ export default function Arena({
   }, [chats]);
 
   // update prompt as per textarea value
-  const handlePromptChange = (
-    event: React.ChangeEvent<HTMLTextAreaElement>
-  ) => {
-    setPrompt(event.target.value);
-  };
+  const handlePromptChange = useCallback(
+    (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setPrompt(event.target.value);
+    },
+    []
+  );
 
   // create new chat
   const handleNewChat = async () => {
     if (!prompt.trim()) {
       return;
     }
-
     if (!threadId) {
       console.log("No thread");
       return;
     }
-
     if (!session) {
       console.log("Unauthorized");
       return;
     }
 
-    const response = await fetch("/api/ai/gemini", {
+    const response = await fetch("/api/ai/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt, model: "gemini-2.0-flash", threadId }),
+      body: JSON.stringify({
+        prompt,
+        model: "google/gemini-2.0-flash-exp:free",
+        threadId,
+      }),
     });
 
     const chatId = response.headers.get("X-Chat-ID");
@@ -73,37 +79,29 @@ export default function Arena({
     };
 
     setPrompt("");
-    setChats((prev) => [...prev, newChat]);
+    setCurrentChat(newChat);
 
     const reader = response?.body?.getReader();
     if (!reader) {
-      setChats((prev) => {
-        const last = prev.at(-1);
-        if (!last) return prev;
-
-        const updatedLast = { ...last, result: "Something went wrong" };
-        return [...prev.slice(0, -1), updatedLast];
-      });
+      setChats((prev) => [
+        ...prev,
+        { ...newChat, result: "Something went wrong" },
+      ]);
       return;
     }
 
     const decoder = new TextDecoder();
-
     let result = "";
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
 
       result += decoder.decode(value, { stream: true });
-
-      setChats((prev) => {
-        const last = prev.at(-1);
-        if (!last) return prev;
-
-        const updatedLast = { ...last, result };
-        return [...prev.slice(0, -1), updatedLast];
-      });
+      setCurrentChat({ ...newChat, result });
     }
+    result += decoder.decode(); // flush the buffer
+    setChats((prev) => [...prev, { ...newChat, result }]);
+    setCurrentChat(null);
 
     localStorage.removeItem("threadId");
     // Redirect to thread page if still on root
@@ -121,24 +119,10 @@ export default function Arena({
           </div>
         ) : (
           <div className="w-3xl space-y-16">
-            {chats.map((chat, idx) => (
-              <div
-                key={chat.id}
-                className="space-y-8"
-                ref={
-                  idx === chats.length - 1 && !chat.result ? bottomRef : null
-                }
-              >
-                <div className="flex justify-end">
-                  <p className="bg-secondary w-fit py-4 px-6 rounded-l-xl rounded-t-xl">
-                    {chat.prompt}
-                  </p>
-                </div>
-                <div>
-                  <CustomMarkdown content={chat.result} />
-                </div>
-              </div>
+            {chats.map((chat) => (
+              <ChatBubble chat={chat} key={chat.id} />
             ))}
+            {currentChat && <ChatBubble chat={currentChat} ref={bottomRef} />}
           </div>
         )}
       </main>
@@ -152,10 +136,3 @@ export default function Arena({
     </>
   );
 }
-
-type Chat = {
-  id: string;
-  prompt: string;
-  result: string;
-  threadId: string | null;
-};

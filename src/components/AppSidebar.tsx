@@ -1,6 +1,6 @@
 "use client";
 
-import { DatabaseZap, Flame, LogIn, Target, Search } from "lucide-react";
+import { LogIn, Target } from "lucide-react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -19,66 +19,6 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-
-const data = {
-  navMain: [
-    {
-      title: "Getting Started",
-      url: "#",
-      items: [
-        {
-          title: "Rename",
-          url: "#",
-        },
-        {
-          title: "Pin",
-          url: "#",
-        },
-        {
-          title: "Delete",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Building Your Application",
-      url: "#",
-      // isActive: true,
-      items: [
-        {
-          title: "Routing",
-          url: "#",
-        },
-        {
-          title: "Data Fetching",
-          url: "#",
-          isActive: true,
-        },
-        {
-          title: "Rendering",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  actions: [
-    {
-      title: "New thread",
-      url: "/",
-      icon: Flame,
-    },
-    {
-      title: "Search your threads",
-      url: "/search",
-      icon: Search,
-    },
-    {
-      title: "Knowledge Base",
-      url: "/knowledge-base",
-      icon: DatabaseZap,
-    },
-  ],
-};
 
 export default function AppSidebar({
   ...props
@@ -117,7 +57,7 @@ export default function AppSidebar({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavActions items={data.actions} />
+        <NavActions />
         <NavMain threads={threads} />
       </SidebarContent>
       <SidebarFooter>

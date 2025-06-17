@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 
-import { gemini } from "@/lib/ai/gemini";
+import { bot } from "@/lib/ai/bot";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -15,36 +15,36 @@ export async function POST(req: NextRequest) {
     data: { prompt, userId: session.user.id, threadId },
   });
 
-  const response = await gemini(model, prompt);
+  const response = await bot(model, prompt);
 
-  const encoder = new TextEncoder();
-  const stream = new ReadableStream({
-    async start(controller) {
-      try {
-        let output = "";
-        for await (const chunk of response) {
-          output += chunk.text;
+  const [clientStream, dbStream] = response.tee();
 
-          await prisma.chat.update({
-            where: { id: chat.id },
-            data: { result: output },
-          });
+  // save chat in the background -> coolest thing ever
+  saveStreamToDB(dbStream, chat.id);
 
-          controller.enqueue(encoder.encode(chunk.text));
-        }
-        controller.close();
-      } catch (error) {
-        controller.error(error);
-      }
-    },
-  });
-
-  return new NextResponse(stream, {
+  return new NextResponse(clientStream, {
     headers: {
       "Content-Type": "text/plain; charset=utf-8",
       "Transfer-Encoding": "chunked",
       "Cache-Control": "no-cache",
       "X-Chat-ID": chat.id,
     },
+  });
+}
+
+async function saveStreamToDB(stream: ReadableStream, chatId: string) {
+  const reader = stream.getReader();
+  let output = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    output += value;
+  }
+
+  await prisma.chat.update({
+    where: { id: chatId },
+    data: { result: output },
   });
 }
