@@ -10,6 +10,8 @@ import ChatBubble from "./ChatBubble";
 import ChatInput from "./ChatInput";
 import Greeting from "./Greeting";
 
+import { useThreads } from "./providers/ThreadsProvider";
+
 function Arena({
   threadId,
   initialChats,
@@ -21,6 +23,7 @@ function Arena({
   const router = useRouter();
 
   const { data: session } = useSession();
+  const { refreshThreads } = useThreads();
 
   const [chats, setChats] = useState<Chat[]>(initialChats);
   const [currentChat, setCurrentChat] = useState<Chat | null>(null);
@@ -126,6 +129,7 @@ function Arena({
     // Redirect to thread page if still on root
     if (pathname === "/") {
       router.replace(`/threads/${threadId}`, { scroll: false });
+      refreshThreads();
     }
   };
 

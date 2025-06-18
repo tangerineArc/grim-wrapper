@@ -9,6 +9,7 @@ export async function bot(modelName: string, prompt: string) {
   const { textStream } = streamText({
     model: openRouter(modelName),
     prompt,
+    temperature: 0.5,
   });
 
   return textStream;

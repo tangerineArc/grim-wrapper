@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { Fira_Code } from "next/font/google";
 
 import AppSidebar from "@/components/AppSidebar";
-import { SessionProvider, ThemeProvider } from "@/components/Providers";
+
+import { SessionProvider } from "@/components/providers/SessionProvider";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { ThreadsProvider } from "@/components/providers/ThreadsProvider";
 
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
@@ -33,8 +36,10 @@ export default function RootLayout({
           <SessionProvider>
             <main className="min-h-screen bg-gray-50">
               <SidebarProvider>
-                <AppSidebar variant="inset" />
-                <SidebarInset>{children}</SidebarInset>
+                <ThreadsProvider>
+                  <AppSidebar variant="inset" />
+                  <SidebarInset>{children}</SidebarInset>
+                </ThreadsProvider>
               </SidebarProvider>
             </main>
           </SessionProvider>
