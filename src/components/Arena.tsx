@@ -4,13 +4,13 @@ import type { Chat } from "@/types/chat";
 
 import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 
 import ChatBubble from "./ChatBubble";
 import ChatInput from "./ChatInput";
 import Greeting from "./Greeting";
 
-export default function Arena({
+function Arena({
   threadId,
   initialChats,
 }: {
@@ -29,10 +29,13 @@ export default function Arena({
 
   const [scrollTrick, setScrollTrick] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const hasSentFirstMessage = useRef(false);
 
   // scroll new chat into view
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (hasSentFirstMessage.current) {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   }, [scrollTrick]);
 
   // update prompt as per textarea value
@@ -66,6 +69,8 @@ export default function Arena({
 
     setPrompt("");
     setCurrentChat(newChat);
+
+    hasSentFirstMessage.current = true;
     setScrollTrick(!scrollTrick);
 
     setIsLoading(true);
@@ -73,10 +78,11 @@ export default function Arena({
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        prompt,
+        prompt: newChat.prompt,
         model: "mistralai/mistral-small-3.1-24b-instruct:free",
         // model: "google/gemini-2.0-flash-exp:free",
         threadId,
+        shouldGenerateTitle: chats.length === 0,
       }),
     });
 
@@ -119,7 +125,7 @@ export default function Arena({
     localStorage.removeItem("threadId");
     // Redirect to thread page if still on root
     if (pathname === "/") {
-      router.push(`/threads/${threadId}`);
+      router.replace(`/threads/${threadId}`, { scroll: false });
     }
   };
 
@@ -152,3 +158,5 @@ export default function Arena({
     </>
   );
 }
+
+export default memo(Arena);

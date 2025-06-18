@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 
 import { bot } from "@/lib/ai/bot";
+import { generateTitle } from "@/lib/ai/title";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -9,7 +10,12 @@ export async function POST(req: NextRequest) {
   if (!session) return new Response("Unauthorized", { status: 401 });
 
   const body = await req.json();
-  const { prompt, model, threadId } = body;
+  const { prompt, model, threadId, shouldGenerateTitle } = body;
+
+  if (shouldGenerateTitle) {
+    const title = await generateTitle(model, prompt);
+    await prisma.thread.update({ where: { id: threadId }, data: { title } });
+  }
 
   const chat = await prisma.chat.create({
     data: { prompt, userId: session.user.id, threadId },

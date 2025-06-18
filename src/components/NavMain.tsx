@@ -2,7 +2,7 @@
 
 import { MoreHorizontal, Pin, TextCursorInput, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { memo } from "react";
 
 import {
   DropdownMenu,
@@ -21,16 +21,13 @@ import {
   useSidebar,
 } from "./ui/sidebar";
 
-export default function NavMain({
+export function NavMain({
   threads,
+  selectedThread,
 }: {
-  threads: {
-    id: string;
-    title: string;
-    createdAt: Date;
-  }[];
+  threads: Thread[];
+  selectedThread: string | null;
 }) {
-  const params = useParams();
   const { isMobile } = useSidebar();
 
   return (
@@ -39,11 +36,11 @@ export default function NavMain({
       <SidebarMenu>
         {threads.map((thread) => (
           <SidebarMenuItem key={thread.id}>
-            <SidebarMenuButton isActive={thread.id === params.threadId} size="sm">
+            <SidebarMenuButton isActive={thread.id === selectedThread} size="sm">
               <Link
                 href={`/threads/${thread.id}`}
-                className="truncate block max-w-full text-left"
-              >{`${thread.id}`}</Link>
+                className="truncate block w-full text-left"
+              >{`${thread.title}`}</Link>
             </SidebarMenuButton>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -77,3 +74,11 @@ export default function NavMain({
     </SidebarGroup>
   );
 }
+
+export default memo(NavMain);
+
+type Thread = {
+  id: string;
+  title: string;
+  createdAt: Date;
+};

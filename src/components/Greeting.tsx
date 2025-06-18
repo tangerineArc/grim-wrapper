@@ -6,7 +6,7 @@ import { greetingData } from "@/data/greeting-data";
 
 export default function Greeting({ user }: { user: User | undefined }) {
   return (
-    <div>
+    <div className="w-full">
       <h1 className="text-3xl font-medium mb-8 ml-1">
         How can I help you{user && `, ${user.name?.split(" ")[0]}`}?
       </h1>

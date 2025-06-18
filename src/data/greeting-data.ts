@@ -7,7 +7,7 @@ export const greetingData = [
     items: [
       "Write a short story about a robot discovering emotions",
       "Help me outline a sci-fi novel set in a post-apocalyptic world",
-      "Create a character profile for a complex villain with sympathetic motives",
+      "Character profile for a complex villain with sympathetic motives",
       "Give me 5 creative writing prompts for flash fiction",
     ],
   },

@@ -3,6 +3,7 @@
 import { LogIn, Target } from "lucide-react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import NavActions from "./NavActions";
@@ -24,6 +25,10 @@ export default function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
   const { data: session } = useSession();
+
+  const params = useParams();
+  const selectedThread =
+    typeof params.threadId === "string" ? params.threadId : null;
 
   const [threads, setThreads] = useState<Thread[]>([]);
 
@@ -58,7 +63,7 @@ export default function AppSidebar({
       </SidebarHeader>
       <SidebarContent>
         <NavActions />
-        <NavMain threads={threads} />
+        <NavMain threads={threads} selectedThread={selectedThread} />
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>

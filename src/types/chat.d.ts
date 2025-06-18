@@ -4,3 +4,9 @@ export type Chat = {
   result: string;
   threadId: string | null;
 };
+
+export type Thread = {
+  id: string;
+  title: string;
+  chats: Chat[];
+}

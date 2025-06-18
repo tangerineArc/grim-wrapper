@@ -16,7 +16,7 @@ export async function POST() {
   }
 
   const thread = await prisma.thread.create({
-    data: { userId: session.user.id, title: "New chat" },
+    data: { userId: session.user.id, title: "New thread" },
   });
 
   return NextResponse.json({ id: thread.id });

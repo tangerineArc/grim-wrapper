@@ -4,15 +4,10 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-import AppSidebar from "@/components/AppSidebar";
 import Arena from "@/components/Arena";
 
 import { Separator } from "@/components/ui/separator";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export default function HomePage() {
   const { status } = useSession();
@@ -51,19 +46,16 @@ export default function HomePage() {
   }, [status, router]);
 
   return (
-    <SidebarProvider>
-      <AppSidebar variant="inset" />
-      <SidebarInset>
-        <header className="bg-background sticky top-0 flex h-16 shrink-0 items-center gap-2 border-b px-4 z-10 rounded-t-lg">
-          <SidebarTrigger className="-ml-1" />
-          <Separator
-            orientation="vertical"
-            className="mr-2 data-[orientation=vertical]:h-4"
-          />
-          <span className="text-sm text-muted-foreground">New thread</span>
-        </header>
-        <Arena threadId={threadId} initialChats={[]} />
-      </SidebarInset>
-    </SidebarProvider>
+    <>
+      <header className="bg-background sticky top-0 flex h-16 shrink-0 items-center gap-2 border-b px-4 z-10 rounded-t-lg">
+        <SidebarTrigger className="-ml-1" />
+        <Separator
+          orientation="vertical"
+          className="mr-2 data-[orientation=vertical]:h-4"
+        />
+        <span className="text-sm text-muted-foreground">New thread</span>
+      </header>
+      <Arena threadId={threadId} initialChats={[]} />
+    </>
   );
 }
