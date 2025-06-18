@@ -77,11 +77,3 @@ export default function NavMain({
     </SidebarGroup>
   );
 }
-
-// export default memo(NavMain);
-
-// type Thread = {
-//   id: string;
-//   title: string;
-//   createdAt: Date;
-// };
