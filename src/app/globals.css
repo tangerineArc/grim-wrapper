@@ -3,31 +3,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-} */
-
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
 
@@ -234,7 +209,80 @@ body {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
+  }
+
+  .custom-markdown h1 {
+    @apply text-4xl font-extrabold tracking-tight my-4;
+  }
+
+  .custom-markdown h2 {
+    @apply text-3xl font-semibold tracking-tight my-4;
+  }
+
+  .custom-markdown h3 {
+    @apply text-2xl font-semibold tracking-tight my-6;
+  }
+
+  .custom-markdown h4 {
+    @apply text-xl font-semibold tracking-tight my-4;
+  }
+
+  .custom-markdown h5 {
+    @apply text-lg py-4;
+  }
+
+  .custom-markdown h6 {
+    @apply text-base py-4;
+  }
+
+  .custom-markdown p {
+    @apply leading-7 [&:not(:first-child)]:my-6;
+  }
+
+  .custom-markdown ul {
+    @apply my-6 ml-6 list-disc [&>li]:mt-2;
+  }
+
+  .custom-markdown ol {
+    @apply my-6 ml-6 list-decimal [&>li]:mt-2;
+  }
+
+  .custom-markdown pre {
+    @apply overflow-x-auto rounded-lg p-4 my-4 border-2;
+  }
+
+  .custom-markdown p > code {
+    @apply bg-muted relative rounded px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold;
+  }
+
+  .custom-markdown blockquote {
+    @apply my-6 border-l-2 pl-6 italic;
+  }
+
+  .custom-markdown table {
+    @apply w-full;
+  }
+
+  .custom-markdown tr {
+    @apply even:bg-muted m-0 border-t p-0;
+  }
+
+  .custom-markdown th {
+    @apply border px-4 py-2 text-left font-bold [&[align=center]]:text-center [&[align=right]]:text-right;
+  }
+
+  .custom-markdown td {
+    @apply border px-4 py-2 text-left [&[align=center]]:text-center [&[align=right]]:text-right;
+  }
+
+  .custom-markdown img {
+    @apply my-6 rounded-lg border-2 p-1 w-1/2 text-center text-muted;
+  }
+
+  .custom-markdown a {
+    @apply text-[#7678ed] font-semibold;
   }
 }

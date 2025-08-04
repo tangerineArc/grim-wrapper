@@ -16,7 +16,7 @@ function ChatInput({
     <div className="flex justify-center">
       <div className="max-w-3xl flex-1 pt-2 px-2 border-2 border-b-0 rounded-3xl rounded-b-none">
         <Textarea
-          placeholder="Type your message here..."
+          placeholder="Ask anything..."
           className="resize-none h-24 rounded-2xl rounded-b-none border-b-0 focus-visible:ring-0 p-4 pt-5"
           value={prompt}
           onChange={promptChangeHandler}
