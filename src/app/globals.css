@@ -283,6 +283,6 @@
   }
 
   .custom-markdown a {
-    @apply text-[#7678ed] font-semibold;
+    @apply text-[#7678ed] font-semibold hover:underline;
   }
 }

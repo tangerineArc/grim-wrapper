@@ -82,8 +82,8 @@ function Arena({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         prompt: newChat.prompt,
-        // model: "mistralai/mistral-small-3.1-24b-instruct:free",
-        model: "google/gemini-2.0-flash-exp:free",
+        model: "mistralai/mistral-small-3.1-24b-instruct:free",
+        // model: "google/gemini-2.0-flash-exp:free",
         threadId,
         shouldGenerateTitle: chats.length === 0,
       }),

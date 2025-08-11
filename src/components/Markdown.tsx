@@ -6,7 +6,7 @@ export default function CustomMarkdown({ content }: { content: string }) {
   const [renderedContent, setRenderedContent] = useState("");
 
   useEffect(() => {
-    markdownToHtml(content + "\n[Link text](https://www.example.com)")
+    markdownToHtml(content)
       .then((res) => setRenderedContent(res))
       .catch((err) => setRenderedContent(`Could not render content: ${err}`));
   }, [content]);
