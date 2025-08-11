@@ -10,3 +10,8 @@ export type Thread = {
   title: string;
   chats: Chat[];
 }
+
+export type Memory = {
+  role: "user" | "assistant" | "system";
+  content: string;
+}
